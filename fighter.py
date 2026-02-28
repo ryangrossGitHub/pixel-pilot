@@ -26,7 +26,16 @@ class Fighter:
         if self._x_acceleration < 5:
             self._x_acceleration += self._speed
 
-    def handle_movement(self):
+    def up(self):
+        self.img_boost()
+        self._y -= self._speed * 8
+
+    def down(self):
+        self._y += self._speed * 10
+
+    def handle_movement(self, screen_width, screen_height):
+        self._apply_friction()
+
         if self._x_acceleration < 2.5 and self._x_acceleration > -2.5:
             self.img_default()
         elif self._x_acceleration > 2.5 and self._x_acceleration < 3:
@@ -37,7 +46,20 @@ class Fighter:
         if self._x_acceleration > 1.1 or self._x_acceleration < -1.1:
             self._x += self._x_acceleration
 
-    def apply_friction(self):
+        # Keep the plane within the screen bounds
+        if self._x < 0:
+            self._x = 0
+            self._x_acceleration = 0
+        elif self._x > screen_width - self._w:
+            self._x = screen_width - self._w
+            self._x_acceleration = 0
+
+        if self._y < 0:
+            self._y = 0
+        elif self._y > screen_height - self._h:
+            self._y = screen_height - self._h
+
+    def _apply_friction(self):
         # Apply friction to slow down the plane when not accelerating
         if self._x_acceleration < 0.05 and self._x_acceleration > -0.05:
             self._x_acceleration = 0
@@ -45,8 +67,6 @@ class Fighter:
             self._x_acceleration -= 0.01
         elif self._x_acceleration < 0:
             self._x_acceleration += 0.01
-
-        self.handle_movement()
 
     def img_default(self):
         self._u = 0
@@ -77,6 +97,12 @@ class Fighter:
         self._v = 0
         self._w = 10
         self._h = 24
+
+    def img_boost(self):
+        self._u = 0
+        self._v = 40
+        self._w = 11
+        self._h = 19
 
     def blt(self):
         return self._x, self._y, self._sprite, self._u, self._v, self._w, self._h, self._transparent_color
