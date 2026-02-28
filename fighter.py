@@ -14,7 +14,7 @@ class Fighter:
         else:
             self.img_bank_left()
 
-        if self._x_acceleration > -4:
+        if self._x_acceleration > -5:
             self._x_acceleration -= self._speed
 
     def right(self):
@@ -23,7 +23,7 @@ class Fighter:
         else:
             self.img_bank_right()
 
-        if self._x_acceleration < 4:
+        if self._x_acceleration < 5:
             self._x_acceleration += self._speed
 
     def handle_movement(self):

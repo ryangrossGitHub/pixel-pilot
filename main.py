@@ -6,7 +6,7 @@ class App:
     def __init__(self):
         self.player = Fighter(64, 64)
 
-        pyxel.init(256, 256, title="Air Parity 1: A New Era", fps=60)
+        pyxel.init(256, 256, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
         pyxel.run(self.update, self.draw)
 
