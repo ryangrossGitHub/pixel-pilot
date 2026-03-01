@@ -1,15 +1,14 @@
-import time
-
 class Fighter:
     def __init__(self, x, y):
         self._sprite = 0 # image bank index
-        self._transparent_color = 1 # dark blue
+        self._transparent_color = 1 # dark blue (ocean)
         self.img_default() # set initial image
         self._x = x
         self._y = y
         self._speed = 0.3
         self._roll_speed = 7 # higher is slower
         self._flip_speed = 10 # higher is slower
+        self._boot_animation_speed = 10 # higher is slower
         self._x_acceleration = 0 # positive means move right, negative means move left
         self._animation_in_progress = None # used to prevent input during certain animations (e.g. boost)
         self._animation_sequence = 0 # used to track which frame of an animation sequence we're on
@@ -29,21 +28,25 @@ class Fighter:
             self._animation_in_progress = "ROLL_LEFT"
             self._animation_sequence = 0
         elif self._animation_in_progress == "ROLL_LEFT":
-            if self._animation_sequence < self._roll_speed:
+            if self._animation_sequence == self._roll_speed:
                 self.img_bank_left()
-            elif self._animation_sequence < self._roll_speed*2:
+            elif self._animation_sequence == self._roll_speed*2:
+                self._x += 4 # compensate for center position of image
                 self.img_barrel_roll_left_side()
-            elif self._animation_sequence < self._roll_speed*3:
+            elif self._animation_sequence == self._roll_speed*3:
+                self._x -= 4 # return to original x position
                 self.img_barrel_roll_upside_down_left()
-            elif self._animation_sequence < self._roll_speed*4:
+            elif self._animation_sequence == self._roll_speed*4:
                 self.img_barrel_roll_upside_down()
-            elif self._animation_sequence < self._roll_speed*5:
+            elif self._animation_sequence == self._roll_speed*5:
                 self.img_barrel_roll_updside_down_right()
-            elif self._animation_sequence < self._roll_speed*6:
+            elif self._animation_sequence == self._roll_speed*6:
+                self._x += 4 # compensate for center position of image
                 self.img_barrel_roll_right_side()
-            elif self._animation_sequence < self._roll_speed*7:
+            elif self._animation_sequence == self._roll_speed*7:
+                self._x -= 4 # return to original x position
                 self.img_bank_right()
-            else:
+            elif self._animation_sequence == self._roll_speed*8:
                 self.img_default()
                 self._animation_in_progress = None
 
@@ -64,21 +67,25 @@ class Fighter:
             self._animation_in_progress = "ROLL_RIGHT"
             self._animation_sequence = 0
         elif self._animation_in_progress == "ROLL_RIGHT":
-            if self._animation_sequence < self._roll_speed:
+            if self._animation_sequence == self._roll_speed:
                 self.img_bank_right()
-            elif self._animation_sequence < self._roll_speed*2:
+            elif self._animation_sequence == self._roll_speed*2:
+                self._x += 4 # compensate for center position of image
                 self.img_barrel_roll_right_side()
-            elif self._animation_sequence < self._roll_speed*3:
+            elif self._animation_sequence == self._roll_speed*3:
+                self._x -= 4 # return to original x position
                 self.img_barrel_roll_updside_down_right()
-            elif self._animation_sequence < self._roll_speed*4:
+            elif self._animation_sequence == self._roll_speed*4:
                 self.img_barrel_roll_upside_down()
-            elif self._animation_sequence < self._roll_speed*5:
+            elif self._animation_sequence == self._roll_speed*5:
                 self.img_barrel_roll_upside_down_left()
-            elif self._animation_sequence < self._roll_speed*6:
+            elif self._animation_sequence == self._roll_speed*6:
+                self._x += 4 # compensate for center position of image
                 self.img_barrel_roll_left_side()
-            elif self._animation_sequence < self._roll_speed*7:
+            elif self._animation_sequence == self._roll_speed*7:
+                self._x -= 4 # return to original x position
                 self.img_bank_left()
-            else:
+            elif self._animation_sequence == self._roll_speed*8:
                 self.img_default()
                 self._animation_in_progress = None
 
@@ -94,31 +101,23 @@ class Fighter:
             self._animation_in_progress = "BOOST"
             self._animation_sequence = 0
         elif self._animation_in_progress == "BOOST":
-            self._animation_sequence += 1
-            if self._animation_sequence < 30:
-                # Animation Seq 1: Boost Start
+            if self._animation_sequence < self._boot_animation_speed:
+                self.img_boost()
+            elif self._animation_sequence == self._boot_animation_speed*2:
                 self.img_boost_hard1()
-                self._y -= self._speed * 5
-            elif self._animation_sequence < 60:
-                # Animation Seq 2: Boost middle
+            elif self._animation_sequence == self._boot_animation_speed*3:
                 self.img_boost_hard2()
-                self._y -= self._speed * 2
-            elif self._animation_sequence == 60:
-                # Animation Seq 3: Sound wave
+            elif self._animation_sequence == self._boot_animation_speed*4:
+                self._x -= 8 # image is wider than default, so move it left to keep it centered on the plane
                 self.img_boost_hard3()
-                self._x -= 16 # image is 3x wider than default, so move it left to keep it centered on the plane
-            elif self._animation_sequence < 90:
-                self._y -= self._speed / 5
-            elif self._animation_sequence == 90:
-                # Animation Seq 4: Leave screen
-                self._x += 16 # move back to original x position
+            elif self._animation_sequence == self._boot_animation_speed*5:
+                self._x += 8 # move back to original x position
                 self.img_boost_hard4()
-            elif self._animation_sequence < 120:
-                self._y -= self._speed * 25
-            else:
+            elif self._animation_sequence == self._boot_animation_speed*7:
                 self._animation_in_progress = None
                 self.img_default()
-                #TODO: Clear screen
+
+        self._animation_sequence += 1
 
     def down(self):
         if self._animation_in_progress is None:
@@ -148,7 +147,6 @@ class Fighter:
                 self.img_default()
 
         self._animation_sequence += 1
-        self._y += self._speed * 5 # plane should be falling back while doing the backflip
 
     def handle_movement(self, screen_width, screen_height):
         self._apply_friction()
@@ -179,7 +177,7 @@ class Fighter:
             self._x = screen_width - self._w
             self._x_acceleration = 0
 
-        if self._animation_in_progress is not "BOOST" and self._y < 0:
+        if self._y < 0:
             self._y = 0
         elif self._y > screen_height - self._h:
             self._y = screen_height - self._h
@@ -196,13 +194,13 @@ class Fighter:
     def img_default(self):
         self._u = 0
         self._v = 0
-        self._w = 11
+        self._w = 16
         self._h = 14
 
     def img_bank_left(self):
         self._u = 16
         self._v = 0
-        self._w = 9
+        self._w = 16
         self._h = 14
 
     def img_bank_left_hard(self):
@@ -214,7 +212,7 @@ class Fighter:
     def img_bank_right(self):
         self._u = 32
         self._v = 0
-        self._w = 9
+        self._w = 16
         self._h = 14
 
     def img_bank_right_hard(self):
@@ -238,31 +236,31 @@ class Fighter:
     def img_barrel_roll_upside_down_left(self):
         self._u = 16
         self._v = 24
-        self._w = 9
+        self._w = 16
         self._h = 14
 
     def img_barrel_roll_updside_down_right(self):
         self._u = 32
         self._v = 24
-        self._w = 9
+        self._w = 16
         self._h = 14
 
     def img_barrel_roll_upside_down(self):
         self._u = 48
         self._v = 24
-        self._w = 11
+        self._w = 16
         self._h = 14
 
     def img_boost(self):
         self._u = 0
         self._v = 40
-        self._w = 11
+        self._w = 16
         self._h = 20
 
     def img_boost_hard1(self):
         self._u = 16
         self._v = 40
-        self._w = 11
+        self._w = 16
         self._h = 24
 
     def img_boost_hard2(self):
@@ -272,51 +270,51 @@ class Fighter:
         self._h = 24
 
     def img_boost_hard3(self):
-        self._u = 0
+        self._u = 8
         self._v = 64
-        self._w = 48
+        self._w = 32
         self._h = 24
 
     def img_boost_hard4(self):
         self._u = 48
         self._v = 40
-        self._w = 11
+        self._w = 16
         self._h = 24
 
     def img_backflip1(self):
         self._u = 48
         self._v = 72
-        self._w = 11
+        self._w = 16
         self._h = 10
 
     def img_backflip2(self):
         self._u = 0
         self._v = 88
-        self._w = 11
+        self._w = 16
         self._h = 6
 
     def img_backflip3(self):
         self._u = 0
         self._v = 94
-        self._w = 11
+        self._w = 16
         self._h = 10
 
     def img_backflip4(self):
         self._u = 16
         self._v = 88
-        self._w = 11
+        self._w = 16
         self._h = 14
 
     def img_backflip5(self):
         self._u = 32
         self._v = 88
-        self._w = 11
+        self._w = 16
         self._h = 10
 
     def img_backflip6(self):
         self._u = 32
         self._v = 98
-        self._w = 11
+        self._w = 16
         self._h = 6
 
     def img_backflip7(self):
