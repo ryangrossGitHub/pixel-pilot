@@ -15,10 +15,13 @@ class App:
     def update(self):
         self.player.handle_movement(self.screen_width, self.screen_height)
                
-        # Don't allow other inputs during boost
+        # Don't allow other inputs during boost or backflip
         if ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) and 
             (pyxel.btn(pyxel.KEY_UP) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_UP))):
             self.player.boost()
+        elif ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) and 
+            (pyxel.btn(pyxel.KEY_DOWN) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN))):
+            self.player.backflip()
         else:
             # Don't allow roll animation in opposite direction of current movement
             if ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) and 
