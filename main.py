@@ -6,7 +6,7 @@ class App:
     def __init__(self):
         self.player = Fighter(64, 64)
         self.screen_width = 256
-        self.screen_height = 256
+        self.screen_height = 240
 
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
@@ -46,6 +46,6 @@ class App:
         pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
 
     def draw_background(self):
-        pyxel.bltm(0, 0, 0, 0, 0, 256, 256)
+        pyxel.bltm(0, 0, 0, 0, 0, self.screen_width, self.screen_height)
 App()
 

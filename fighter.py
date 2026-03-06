@@ -5,11 +5,15 @@ class Fighter:
         self.img_default() # set initial image
         self._x = x
         self._y = y
-        self._speed = 0.3
+        self._x_speed = 0.4
+        self._y_speed = 0.4
         self._roll_speed = 7 # higher is slower
         self._flip_speed = 10 # higher is slower
         self._boot_animation_speed = 10 # higher is slower
         self._x_acceleration = 0 # positive means move right, negative means move left
+        self._x_friction = 0.01 # how quickly the plane slows down when not accelerating
+        self._y_acceleration = 0 # positive means move down, negative means move up
+        self._y_friction = 0.02 # how quickly the plane slows down when not accelerating
         self._animation_in_progress = None # used to prevent input during certain animations (e.g. boost)
         self._animation_sequence = 0 # used to track which frame of an animation sequence we're on
 
@@ -21,7 +25,7 @@ class Fighter:
                 self.img_bank_left()
 
             if self._x_acceleration > -5:
-                self._x_acceleration -= self._speed
+                self._x_acceleration -= self._x_speed
 
     def roll_left(self):
         if self._animation_in_progress is None:
@@ -51,6 +55,7 @@ class Fighter:
                 self._animation_in_progress = None
 
         self._animation_sequence += 1
+        self._x -= 1
 
     def right(self):
         if self._animation_in_progress is None:
@@ -60,7 +65,7 @@ class Fighter:
                 self.img_bank_right()
 
             if self._x_acceleration < 5:
-                self._x_acceleration += self._speed
+                self._x_acceleration += self._x_speed
 
     def roll_right(self):
         if self._animation_in_progress is None:
@@ -90,11 +95,14 @@ class Fighter:
                 self._animation_in_progress = None
 
         self._animation_sequence += 1
+        self._x += 1
 
     def up(self):
         if self._animation_in_progress is None:
             self.img_boost()
-            self._y -= self._speed * 8
+
+            if self._y_acceleration > -5:
+                self._y_acceleration -= self._y_speed/2
 
     def boost(self):
         if self._animation_in_progress is None:
@@ -118,10 +126,12 @@ class Fighter:
                 self.img_default()
 
         self._animation_sequence += 1
+        self._y -= 2
 
     def down(self):
         if self._animation_in_progress is None:
-            self._y += self._speed * 10
+            if self._y_acceleration < 5:
+                self._y_acceleration += self._y_speed
 
     def backflip(self):
         if self._animation_in_progress is None:
@@ -147,6 +157,7 @@ class Fighter:
                 self.img_default()
 
         self._animation_sequence += 1
+        self._y += 2
 
     def handle_movement(self, screen_width, screen_height):
         self._apply_friction()
@@ -169,6 +180,9 @@ class Fighter:
         if self._x_acceleration > 1.1 or self._x_acceleration < -1.1:
             self._x += self._x_acceleration
 
+        if self._y_acceleration > 1.1 or self._y_acceleration < -1.1:
+            self._y += self._y_acceleration
+
         # Keep the plane within the screen bounds
         if self._x < 0:
             self._x = 0
@@ -187,9 +201,16 @@ class Fighter:
         if self._x_acceleration < 0.05 and self._x_acceleration > -0.05:
             self._x_acceleration = 0
         elif self._x_acceleration > 0:
-            self._x_acceleration -= 0.01
+            self._x_acceleration -= self._x_friction
         elif self._x_acceleration < 0:
-            self._x_acceleration += 0.01
+            self._x_acceleration += self._x_friction
+
+        if self._y_acceleration < 0.05 and self._y_acceleration > -0.05:
+            self._y_acceleration = 0
+        elif self._y_acceleration > 0:
+            self._y_acceleration -= self._y_friction
+        elif self._y_acceleration < 0:
+            self._y_acceleration += self._y_friction
 
     def img_default(self):
         self._u = 0
