@@ -8,13 +8,14 @@ class App:
         self.screen_width = 256
         self.screen_height = 240
         self.background_y = 0
+        self.background_scroll_speed = 1
 
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        self.background_y = (self.background_y + 1) % 8 # Loop background every 16 pixels for seamless scrolling
+        self.background_y = (self.background_y + self.background_scroll_speed) % 8 # Loop background every 16 pixels for seamless scrolling
         self.player.handle_movement(self.screen_width, self.screen_height)
                
         # Prevent concurrent animation/special movements
@@ -44,6 +45,7 @@ class App:
 
     def draw(self):
         pyxel.cls(0)
+        self.background_scroll_speed = self.player.background_scroll_speed # Sync background scroll speed with player state
         self.draw_background()
         pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
 

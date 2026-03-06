@@ -7,6 +7,7 @@ class Fighter:
         self._y = y
         self._x_speed = 0.4
         self._y_speed = 0.4
+        self.background_scroll_speed = 1
         self._roll_speed = 7 # higher is slower
         self._flip_speed = 10 # higher is slower
         self._boot_animation_speed = 10 # higher is slower
@@ -108,6 +109,7 @@ class Fighter:
         if self._animation_in_progress is None:
             self._animation_in_progress = "BOOST"
             self._animation_sequence = 0
+            self.background_scroll_speed = 2
         elif self._animation_in_progress == "BOOST":
             if self._animation_sequence < self._boot_animation_speed:
                 self.img_boost()
@@ -123,6 +125,7 @@ class Fighter:
                 self.img_boost_hard4()
             elif self._animation_sequence == self._boot_animation_speed*7:
                 self._animation_in_progress = None
+                self.background_scroll_speed = 1
                 self.img_default()
 
         self._animation_sequence += 1
@@ -137,6 +140,7 @@ class Fighter:
         if self._animation_in_progress is None:
             self._animation_in_progress = "BACKFLIP"
             self._animation_sequence = 0
+            self.background_scroll_speed = 0.5
         elif self._animation_in_progress == "BACKFLIP":
             if self._animation_sequence < self._flip_speed:
                 self.img_backflip1()
@@ -154,6 +158,7 @@ class Fighter:
                 self.img_backflip7()
             else:
                 self._animation_in_progress = None
+                self.background_scroll_speed = 1
                 self.img_default()
 
         self._animation_sequence += 1
