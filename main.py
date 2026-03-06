@@ -7,12 +7,14 @@ class App:
         self.player = Fighter(64, 64)
         self.screen_width = 256
         self.screen_height = 240
+        self.background_y = 0
 
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
         pyxel.run(self.update, self.draw)
 
     def update(self):
+        self.background_y = (self.background_y + 1) % 8 # Loop background every 16 pixels for seamless scrolling
         self.player.handle_movement(self.screen_width, self.screen_height)
                
         # Prevent concurrent animation/special movements
@@ -46,6 +48,9 @@ class App:
         pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
 
     def draw_background(self):
-        pyxel.bltm(0, 0, 0, 0, 0, self.screen_width, self.screen_height)
+        pyxel.bltm(0, self.background_y, 0, 0, 0, self.screen_width, self.screen_height)
+
+        # Second bltm to create seamless scrolling effect when background_y > 0
+        pyxel.bltm(0, self.background_y-16, 0, 0, 0, self.screen_width, self.screen_height)
 App()
 
