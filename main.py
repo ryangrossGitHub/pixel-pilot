@@ -25,7 +25,8 @@ class App:
         elif ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) and 
             (pyxel.btn(pyxel.KEY_DOWN) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN))):
             self.player.backflip()
-        elif ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) and 
+        
+        if ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) and 
             (pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT))):
             self.player.roll_left()
         elif ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) and 
@@ -45,7 +46,11 @@ class App:
 
     def draw(self):
         pyxel.cls(0)
-        self.background_scroll_speed = self.player.background_scroll_speed # Sync background scroll speed with player state
+        
+        self.background_scroll_speed = 1.5 + -1 *self.player._y_acceleration/5 # Sync background scroll speed with player state
+        if self.background_scroll_speed < 1.5:
+            self.background_scroll_speed = 1.5
+        
         self.draw_background()
         pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
 
