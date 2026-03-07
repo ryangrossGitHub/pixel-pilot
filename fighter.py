@@ -1,3 +1,7 @@
+import random
+
+from particle import Particle
+
 class Fighter:
     def __init__(self, x, y):
         self._sprite = 0 # image bank index
@@ -5,6 +9,8 @@ class Fighter:
         self.img_default() # set initial image
         self._x = x
         self._y = y
+        self._w = 16
+        self._h = 16
         self._x_speed = 0.4
         self._y_speed = 0.4
         self._roll_speed = 5 # higher is slower
@@ -111,9 +117,6 @@ class Fighter:
         if self._y_acceleration > 4.8:
             self.backflip()
 
-    def boost(self):
-        x = 1 # TODO REPLACE WITH PARTICLE BOOST EFFECT
-
     def backflip(self):
         if self._animation_in_progress is None:
             self._animation_in_progress = "BACKFLIP"
@@ -156,8 +159,7 @@ class Fighter:
         if self._x_acceleration > 1.1 or self._x_acceleration < -1.1:
             self._x += self._x_acceleration
 
-        if self._y_acceleration > 1.1 or self._y_acceleration < -1.1:
-            self._y += self._y_acceleration
+        self._y += self._y_acceleration
 
         # Keep the plane within the screen bounds
         if self._x < 0:
@@ -173,93 +175,90 @@ class Fighter:
         elif self._y > screen_height - self._h - 20:
             self._y = screen_height - self._h - 20
 
+        self._update_boost_particles()
+
     def _apply_friction(self):
-        if self._y_acceleration < 0:
+        if self._y_acceleration < -0.2:
             self._y_acceleration += self._y_friction
+
+    def _update_boost_particles(self):
+        # Update existing particles
+        for particle in self._boost_particles:
+            particle.update()
+
+        # Remove particles that have expired
+        self._boost_particles = [p for p in self._boost_particles if p.get_life() > 0]
+
+        # Add new particles based on current acceleration
+        if self._y_acceleration <= 0: # Only show boost particles when accelerating upwards
+            for i in range(10 + int(self._y_acceleration*10*-1)): # More particles for higher acceleration
+                self._boost_particles.append(Particle(
+                    x=self._x + self._w/2 - 1,
+                    y=self._y + self._h,
+                    x_speed=(self._y_acceleration/5) * (random.random() - 0.5), # Random horizontal speed for spread
+                    y_speed=self._y_acceleration/5 + 0.5, # Base speed plus some variation based on acceleration
+                    color=7, # white
+                    life=random.randint(10, 30) # frames
+                ))
+
+    def get_boost_particles(self):
+        return self._boost_particles
 
     def img_default(self):
         self._u = 0
         self._v = 0
-        self._w = 16
-        self._h = 16
 
     def img_bank_left(self):
         self._u = 16
         self._v = 0
-        self._w = 16
-        self._h = 16
 
     def img_bank_left_hard(self):
         self._u = 32
         self._v = 0
-        self._w = 16
-        self._h = 16
 
     def img_bank_right(self):
         self._u = 112
         self._v = 0
-        self._w = 16
-        self._h = 16
 
     def img_bank_right_hard(self):
         self._u = 96
         self._v = 0
-        self._w = 16
-        self._h = 16
 
     def img_barrel_roll_upside_down_left(self):
         self._u = 48
         self._v = 0
-        self._w = 16
-        self._h = 16
 
     def img_barrel_roll_updside_down_right(self):
         self._u = 80
         self._v = 0
-        self._w = 16
-        self._h = 16
 
     def img_barrel_roll_upside_down(self):
         self._u = 64
         self._v = 0
-        self._w = 16
-        self._h = 16
 
     def img_backflip1(self):
         self._u = 0
         self._v = 16
-        self._w = 16
-        self._h = 16
 
     def img_backflip2(self):
         self._u = 16
         self._v = 16
-        self._w = 16
-        self._h = 16
 
     def img_backflip3(self):
         self._u = 32
         self._v = 16
-        self._w = 16
-        self._h = 16
 
     def img_backflip4(self):
         self._u = 48
         self._v = 16
-        self._w = 16
-        self._h = 16
 
     def img_backflip5(self):
         self._u = 64
         self._v = 16
-        self._w = 16
-        self._h = 16
 
     def img_backflip6(self):
         self._u = 80
         self._v = 16
-        self._w = 16
-        self._h = 16
-
+        
     def blt(self):
         return self._x, self._y, self._sprite, self._u, self._v, self._w, self._h, self._transparent_color

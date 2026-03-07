@@ -15,7 +15,7 @@ class App:
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        self.background_y = (self.background_y + self.background_scroll_speed) % 8 # Loop background every 16 pixels for seamless scrolling
+        self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling
         self.player.handle_movement(self.screen_width, self.screen_height)
         
         if ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) and 
@@ -40,16 +40,19 @@ class App:
         pyxel.cls(0)
         
         self.background_scroll_speed = 1.5 + -1 *self.player.get_y_acceleration()/5 # Sync background scroll speed with player state
-        if self.background_scroll_speed < 1.5:
-            self.background_scroll_speed = 1.5
+        if self.background_scroll_speed < 0.5:
+            self.background_scroll_speed = 0.5
         
         self.draw_background()
         pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
+        
+        for particle in self.player.get_boost_particles():
+            pyxel.pset(*particle.get_position_and_color())
 
     def draw_background(self):
         pyxel.bltm(0, self.background_y, 0, 0, 0, self.screen_width, self.screen_height)
 
         # Second bltm to create seamless scrolling effect when background_y > 0
-        pyxel.bltm(0, self.background_y-16, 0, 0, 0, self.screen_width, self.screen_height)
+        pyxel.bltm(0, self.background_y-self.screen_height+2, 0, 0, 0, self.screen_width, self.screen_height)
 App()
 
