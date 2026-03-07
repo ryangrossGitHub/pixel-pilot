@@ -7,7 +7,6 @@ class Fighter:
         self._y = y
         self._x_speed = 0.4
         self._y_speed = 0.4
-        self.background_scroll_speed = 1
         self._roll_speed = 5 # higher is slower
         self._flip_speed = 10 # higher is slower
         self._boot_animation_speed = 10 # higher is slower
@@ -16,6 +15,10 @@ class Fighter:
         self._y_friction = 0.01 # how quickly the plane slows down when not accelerating
         self._animation_in_progress = None # used to prevent input during certain animations (e.g. boost)
         self._animation_sequence = 0 # used to track which frame of an animation sequence we're on
+        self._boost_particles = []
+
+    def get_y_acceleration(self):
+        return self._y_acceleration
 
     def left(self):
         if self._animation_in_progress is None:
@@ -55,7 +58,7 @@ class Fighter:
                 self._animation_in_progress = None
 
         self._animation_sequence += 1
-        self._x -= 1
+        self._x -= -0.5
 
     def right(self):
         if self._animation_in_progress is None:
@@ -95,7 +98,7 @@ class Fighter:
                 self._animation_in_progress = None
 
         self._animation_sequence += 1
-        self._x += 1
+        self._x += 0.5
 
     def up(self):
         if self._y_acceleration > -5:
@@ -105,6 +108,9 @@ class Fighter:
         if self._y_acceleration < 5:
             self._y_acceleration += self._y_speed
 
+        if self._y_acceleration > 4.8:
+            self.backflip()
+
     def boost(self):
         x = 1 # TODO REPLACE WITH PARTICLE BOOST EFFECT
 
@@ -112,7 +118,6 @@ class Fighter:
         if self._animation_in_progress is None:
             self._animation_in_progress = "BACKFLIP"
             self._animation_sequence = 0
-            self.background_scroll_speed = 0.5
         elif self._animation_in_progress == "BACKFLIP":
             if self._animation_sequence < self._flip_speed:
                 self.img_backflip1()
@@ -128,11 +133,9 @@ class Fighter:
                 self.img_backflip6()
             else:
                 self._animation_in_progress = None
-                self.background_scroll_speed = 1
                 self.img_default()
 
         self._animation_sequence += 1
-        self._y += 2
 
     def handle_movement(self, screen_width, screen_height):
         self._apply_friction()
