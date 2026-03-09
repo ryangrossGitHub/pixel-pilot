@@ -18,10 +18,10 @@ class App:
         self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling
         self.player.handle_movement(self.screen_width, self.screen_height)
         
-        if ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) and 
+        if ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A)) and 
             (pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT))):
             self.player.roll_left()
-        elif ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) and 
+        elif ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A)) and 
             (pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT))):
             self.player.roll_right()
         
@@ -39,7 +39,7 @@ class App:
     def draw(self):
         pyxel.cls(0)
         
-        self.background_scroll_speed = 1.5 + -1 *self.player.get_y_acceleration()/5 # Sync background scroll speed with player state
+        self.background_scroll_speed = 15 + -1 *self.player.get_y_acceleration()*2 # Sync background scroll speed with player state
         if self.background_scroll_speed < 0.5:
             self.background_scroll_speed = 0.5
         

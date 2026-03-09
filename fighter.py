@@ -5,12 +5,13 @@ from particle import Particle
 class Fighter:
     def __init__(self, x, y):
         self._sprite = 0 # image bank index
-        self._transparent_color = 0 # dark blue (ocean)
+        self._transparent_color = 1 # dark blue (ocean)
         self.img_default() # set initial image
         self._x = x
         self._y = y
         self._w = 16
         self._h = 16
+        self._y_margin = 20 # buffer space between plane and screen edges on y axis
         self._x_speed = 0.4
         self._y_speed = 0.4
         self._roll_speed = 5 # higher is slower
@@ -18,7 +19,7 @@ class Fighter:
         self._boot_animation_speed = 10 # higher is slower
         self._x_acceleration = 0 # positive means move right, negative means move left
         self._y_acceleration = 0 # positive means move down, negative means move up
-        self._y_friction = 0.01 # how quickly the plane slows down when not accelerating
+        self._y_friction = 0.1 # how quickly the plane slows down when not accelerating
         self._animation_in_progress = None # used to prevent input during certain animations (e.g. boost)
         self._animation_sequence = 0 # used to track which frame of an animation sequence we're on
         self._boost_particles = []
@@ -114,7 +115,7 @@ class Fighter:
         if self._y_acceleration < 5:
             self._y_acceleration += self._y_speed
 
-        if self._y_acceleration > 4.8:
+        if self._y_acceleration > 3:
             self.backflip()
 
     def backflip(self):
@@ -170,10 +171,10 @@ class Fighter:
             self._x_acceleration = 0
 
         # Add margin for y
-        if self._y < 20:
-            self._y = 20
-        elif self._y > screen_height - self._h - 20:
-            self._y = screen_height - self._h - 20
+        if self._y < self._y_margin:
+            self._y = self._y_margin
+        elif self._y > screen_height - self._h - self._y_margin:
+            self._y = screen_height - self._h - self._y_margin
 
         self._update_boost_particles()
 
@@ -191,14 +192,14 @@ class Fighter:
 
         # Add new particles based on current acceleration
         if self._y_acceleration <= 0: # Only show boost particles when accelerating upwards
-            for i in range(10 + int(self._y_acceleration*10*-1)): # More particles for higher acceleration
+            for i in range(10 + int(self._y_acceleration*-1)): # More particles for higher acceleration
                 self._boost_particles.append(Particle(
                     x=self._x + self._w/2 - 1,
                     y=self._y + self._h,
-                    x_speed=(self._y_acceleration/5) * (random.random() - 0.5), # Random horizontal speed for spread
-                    y_speed=self._y_acceleration/5 + 0.5, # Base speed plus some variation based on acceleration
-                    color=7, # white
-                    life=random.randint(10, 30) # frames
+                    x_speed=(0.3+self._y_acceleration/5) * (random.random() - 0.5), # Random horizontal speed for spread
+                    y_speed=-self._y_acceleration/4 + 0.5, # Base speed plus some variation based on acceleration
+                    color=random.choice([9,10]), # yellow and orange
+                    life=random.randint(10, 35) # frames
                 ))
 
     def get_boost_particles(self):
