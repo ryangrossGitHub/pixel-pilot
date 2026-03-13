@@ -12,13 +12,15 @@ class App:
 
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
+        # pyxel.play(1, 1, loop=True) # Engine
         pyxel.run(self.update, self.draw)
 
     def update(self):
         self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling
         self.player.handle_movement(self.screen_width, self.screen_height)
         
-        if (pyxel.btn(pyxel.KEY_A) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A)):
+        if (pyxel.btn(pyxel.KEY_A) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)):
+            pyxel.play(0, 0) # Gun
             self.player.shoot_gun(self.screen_height)
         
         # Allow simultaneous vertical and horizontal input without blocking each other
