@@ -23,6 +23,7 @@ class Fighter:
         self._animation_in_progress = None # used to prevent input during certain animations (e.g. boost)
         self._animation_sequence = 0 # used to track which frame of an animation sequence we're on
         self._boost_particles = []
+        self._gun_particles = []
 
     def get_y_acceleration(self):
         return self._y_acceleration
@@ -181,6 +182,7 @@ class Fighter:
             self._y = screen_height - self._h - self._y_margin
 
         self._update_boost_particles()
+        self._update_gun_particles()
 
     def _apply_friction(self):
         if self._y_acceleration < -0.2:
@@ -208,6 +210,27 @@ class Fighter:
 
     def get_boost_particles(self):
         return self._boost_particles
+    
+    def shoot_gun(self, screen_height):
+        self._gun_particles.append(Particle(
+            x=self._x + self._w/2 - 1,
+            y=self._y,
+            x_speed=0,
+            y_speed=-5, # Upwards speed with some variation
+            color=7, # white
+            life=screen_height # frames
+        ))
+
+    def _update_gun_particles(self):
+        # Update existing particles
+        for particle in self._gun_particles:
+            particle.update()
+
+        # Remove particles that have expired
+        self._gun_particles = [p for p in self._gun_particles if p.get_life() > 0]
+
+    def get_gun_particles(self):
+        return self._gun_particles
 
     def img_default(self):
         self._u = 0

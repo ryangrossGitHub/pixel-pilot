@@ -18,12 +18,8 @@ class App:
         self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling
         self.player.handle_movement(self.screen_width, self.screen_height)
         
-        if ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A)) and 
-            (pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT))):
-            TODO = 1
-        elif ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A)) and 
-            (pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT))):
-            TODO = 1
+        if (pyxel.btn(pyxel.KEY_A) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A)):
+            self.player.shoot_gun(self.screen_height)
         
         # Allow simultaneous vertical and horizontal input without blocking each other
         if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
@@ -44,17 +40,11 @@ class App:
         
         self.draw_background()
         pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
-        
-        # Debug overlay: show acceleration and current animation state
-        try:
-            acc = self.player._x_acceleration
-            anim = self.player._animation_in_progress
-            pyxel.text(6, 6, f"acc:{acc:.2f}", 7)
-            pyxel.text(6, 14, f"anim:{anim}", 7)
-        except Exception:
-            pass
 
         for particle in self.player.get_boost_particles():
+            pyxel.pset(*particle.get_position_and_color())
+
+        for particle in self.player.get_gun_particles():
             pyxel.pset(*particle.get_position_and_color())
 
     def draw_background(self):
