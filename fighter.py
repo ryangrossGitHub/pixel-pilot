@@ -31,6 +31,8 @@ class Fighter:
         if self._animation_in_progress is None:
             if self._x_acceleration > 0:
                 self.img_bank_left_hard()
+            elif self._x_acceleration < -2.5:
+                self.roll_left()
             else:
                 self.img_bank_left()
 
@@ -60,17 +62,19 @@ class Fighter:
             elif self._animation_sequence == self._roll_speed*7:
                 self._x -= 4 # return to original x position
                 self.img_bank_right()
-            elif self._animation_sequence == self._roll_speed*8:
+            elif self._animation_sequence >= self._roll_speed*8:
                 self.img_default()
                 self._animation_in_progress = None
 
         self._animation_sequence += 1
-        self._x -= -0.5
+        self._x -= 0.5
 
     def right(self):
         if self._animation_in_progress is None:
             if self._x_acceleration < 0:
                 self.img_bank_right_hard()
+            elif self._x_acceleration > 2.5:
+                self.roll_right()
             else:
                 self.img_bank_right()
 
@@ -100,7 +104,7 @@ class Fighter:
             elif self._animation_sequence == self._roll_speed*7:
                 self._x -= 4 # return to original x position
                 self.img_bank_left()
-            elif self._animation_sequence == self._roll_speed*8:
+            elif self._animation_sequence >= self._roll_speed*8:
                 self.img_default()
                 self._animation_in_progress = None
 
@@ -152,9 +156,9 @@ class Fighter:
             self.roll_right()
         elif self._x_acceleration < 2.5 and self._x_acceleration > -2.5:
             self.img_default()
-        elif self._x_acceleration > 2.5 and self._x_acceleration < 3:
+        elif self._x_acceleration >= 2.5:
             self.img_bank_right()
-        elif self._x_acceleration < -2.5 and self._x_acceleration > -3:
+        elif self._x_acceleration <= -2.5:
             self.img_bank_left()
 
         if self._x_acceleration > 1.1 or self._x_acceleration < -1.1:
@@ -192,7 +196,7 @@ class Fighter:
 
         # Add new particles based on current acceleration
         if self._y_acceleration <= 0: # Only show boost particles when accelerating upwards
-            for i in range(10 + int(self._y_acceleration*-1)): # More particles for higher acceleration
+            for i in range(3 + int(self._y_acceleration*-1)): # More particles for higher acceleration
                 self._boost_particles.append(Particle(
                     x=self._x + self._w/2 - 1,
                     y=self._y + self._h,

@@ -5,8 +5,8 @@ from fighter import Fighter
 class App:
     def __init__(self):
         self.player = Fighter(64, 64)
-        self.screen_width = 256
-        self.screen_height = 240
+        self.screen_width = 480
+        self.screen_height = 270
         self.background_y = 0
         self.background_scroll_speed = 1
 
@@ -20,10 +20,10 @@ class App:
         
         if ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A)) and 
             (pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT))):
-            self.player.roll_left()
+            TODO = 1
         elif ((pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A)) and 
             (pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT))):
-            self.player.roll_right()
+            TODO = 1
         
         # Prevent opposite inputs on x or y axis
         if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
@@ -46,6 +46,15 @@ class App:
         self.draw_background()
         pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
         
+        # Debug overlay: show acceleration and current animation state
+        try:
+            acc = self.player._x_acceleration
+            anim = self.player._animation_in_progress
+            pyxel.text(6, 6, f"acc:{acc:.2f}", 7)
+            pyxel.text(6, 14, f"anim:{anim}", 7)
+        except Exception:
+            pass
+
         for particle in self.player.get_boost_particles():
             pyxel.pset(*particle.get_position_and_color())
 
