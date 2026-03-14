@@ -12,17 +12,20 @@ class App:
 
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
-        # pyxel.play(1, 1, loop=True) # Engine
         pyxel.run(self.update, self.draw)
 
     def update(self):
         self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling
         self.player.handle_movement(self.screen_width, self.screen_height)
         
-        if (pyxel.btn(pyxel.KEY_A) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)):
-            pyxel.play(0, 0) # Gun
+        if (pyxel.btn(pyxel.KEY_Z) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_RIGHTSHOULDER):
             self.player.shoot_gun(self.screen_height)
+        elif (pyxel.btnr(pyxel.KEY_Z) or pyxel.btnr(pyxel.GAMEPAD1_BUTTON_B)) or pyxel.btnr(pyxel.GAMEPAD1_BUTTON_RIGHTSHOULDER):
+            self.player.reset_gun_burst()
         
+        if (pyxel.btnp(pyxel.KEY_A) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_LEFTSHOULDER):
+            self.player.shoot_missile(self.screen_height)
+
         # Allow simultaneous vertical and horizontal input without blocking each other
         if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
             self.player.left()
@@ -36,7 +39,7 @@ class App:
     def draw(self):
         pyxel.cls(0)
         
-        self.background_scroll_speed = 15 + -1 *self.player.get_y_acceleration()*2 # Sync background scroll speed with player state
+        self.background_scroll_speed = 17 + -1 *self.player.get_y_acceleration()*1.5 # Sync background scroll speed with player state
         if self.background_scroll_speed < 0.5:
             self.background_scroll_speed = 0.5
         
@@ -48,6 +51,9 @@ class App:
 
         for particle in self.player.get_gun_particles():
             pyxel.pset(*particle.get_position_and_color())
+
+        for particle in self.player.get_missile_particles():
+            pyxel.blt(particle.get_x(), particle.get_y(), 0, 0, 16, 1, 3)
 
     def draw_background(self):
         pyxel.bltm(0, self.background_y, 0, 0, 0, self.screen_width, self.screen_height)

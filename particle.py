@@ -15,5 +15,11 @@ class Particle:
     def get_life(self):
         return self._life
     
+    def get_x(self):
+        return self._x
+    
+    def get_y(self):
+        return self._y
+    
     def get_position_and_color(self):
         return (self._x, self._y, self._color)
