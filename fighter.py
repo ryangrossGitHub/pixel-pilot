@@ -24,6 +24,7 @@ class Fighter:
         self._animation_in_progress = None # used to prevent input during certain animations (e.g. boost)
         self._animation_sequence = 0 # used to track which frame of an animation sequence we're on
         self._boost_particles = []
+        self._flare_particles = []
         self._gun_particles = []
         self._gun_burst_max = 10
         self._gun_burst_count = 0 # Track how many shots have been fired in the current burst
@@ -144,6 +145,7 @@ class Fighter:
             self._y = screen_height - self._h - self._y_margin
 
         self._update_boost_particles()
+        self._update_flare_particles()
         self._update_gun_particles()
         self._update_missile_particles()
 
@@ -173,6 +175,28 @@ class Fighter:
 
     def get_boost_particles(self):
         return self._boost_particles
+    
+    def fire_flares(self):
+        for i in range(50):
+            self._flare_particles.append(Particle(
+                x=self._x + self._w/2 - 1,
+                y=self._y + self._h,
+                x_speed=(4) * (random.random() - 0.5), # Random horizontal speed for spread
+                y_speed=1 + random.random()*1.5, # Upwards speed with some variation
+                color=7, # white
+                life=random.randint(40, 60) # frames
+            ))
+
+    def _update_flare_particles(self):
+        # Update existing particles
+        for particle in self._flare_particles:
+            particle.update()
+
+        # Remove particles that have expired
+        self._flare_particles = [p for p in self._flare_particles if p.get_life() > 0]
+
+    def get_flare_particles(self):
+        return self._flare_particles
     
     def shoot_gun(self, screen_height):
         if self._gun_burst_count < self._gun_burst_max:

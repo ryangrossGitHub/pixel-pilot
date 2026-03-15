@@ -12,7 +12,6 @@ class App:
 
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
-        # pyxel.playm(0, loop=True)
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -25,7 +24,8 @@ class App:
             self.player.reset_gun_burst()
         
         if (pyxel.btnp(pyxel.KEY_A) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_LEFTSHOULDER):
-            self.player.shoot_missile(self.screen_height)
+            # self.player.shoot_missile(self.screen_height)
+            self.player.fire_flares()
 
         # Allow simultaneous vertical and horizontal input without blocking each other
         if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
@@ -48,6 +48,9 @@ class App:
         pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
 
         for particle in self.player.get_boost_particles():
+            pyxel.pset(*particle.get_position_and_color())
+
+        for particle in self.player.get_flare_particles():
             pyxel.pset(*particle.get_position_and_color())
 
         for particle in self.player.get_gun_particles():
