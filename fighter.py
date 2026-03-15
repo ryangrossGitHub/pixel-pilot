@@ -4,10 +4,10 @@ import pyxel
 from particle import Particle
 
 class Fighter:
-    def __init__(self, x, y):
+    def __init__(self, x, y, acceleration_y):
         self._sprite = 0 # image bank index
         self._transparent_color = 1 # dark blue (ocean)
-        self.img_default() # set initial image
+        self.img_defualt_slow() # set initial image
         self._x = x
         self._y = y
         self._w = 16
@@ -19,7 +19,7 @@ class Fighter:
         self._roll_speed = 10 # higher is slower
         self._boot_animation_speed = 10 # higher is slower
         self._x_acceleration = 0 # positive means move right, negative means move left
-        self._y_acceleration = 0 # positive means move down, negative means move up
+        self._y_acceleration = acceleration_y # positive means move down, negative means move up
         self._y_friction = 0.1 # how quickly the plane slows down when not accelerating
         self._animation_in_progress = None # used to prevent input during certain animations (e.g. boost)
         self._animation_sequence = 0 # used to track which frame of an animation sequence we're on
