@@ -28,7 +28,7 @@ class App:
         if self.game_paused:
             return
         
-        self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling
+        self.update_background()
         self.player.handle_movement(self.screen_width, self.screen_height)
 
         if (pyxel.btn(pyxel.KEY_SPACE) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_RIGHTSHOULDER):
@@ -84,6 +84,9 @@ class App:
         for particle in self.player.get_missile_particles():
             pyxel.blt(particle.get_x(), particle.get_y(), 0, 0, 16, 1, 3)
 
+    def update_background(self):
+        self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling
+
     def draw_background(self):
         pyxel.bltm(0, self.background_y, 0, 0, 0, self.screen_width, self.screen_height)
 
@@ -92,13 +95,14 @@ class App:
 
     def draw_start_screen(self):
         pyxel.cls(1)
-        pyxel.bltm(0, self.background_y, 0, 0, 0, self.screen_width, self.screen_height)
+        self.update_background()
+        self.draw_background()
         self.draw_carrier(self.runway_position_y)
-        pyxel.text(self.screen_width//2 - 15, self.screen_height//2 - 50, "PIXEL PILOT", 6)
+        pyxel.text(self.screen_width//2 - 15, self.screen_height//2 - 50, "PIXEL PILOT", 9)
         pyxel.text(self.screen_width//2 - 50, self.screen_height//2 - 30, "CONTROLS: MOVE|FIRE|FLARES|PAUSE", 7)
         pyxel.text(self.screen_width//2 - 50, self.screen_height//2 - 20, "KEYBOARD: ARROW KEYS|SPACE|SHIFT|P", 7)
         pyxel.text(self.screen_width//2 - 50, self.screen_height//2 - 10, "CONTROLLER: DPAD|A|B|START", 7)
-        pyxel.text(self.screen_width//2 - 25, self.screen_height//2 + 10, "PRESS UP TO FLY!!!", 10)
+        pyxel.text(self.screen_width//2 - 25, self.screen_height//2 + 10, "PRESS UP TO FLY!!!", 8)
         pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
 
     def update_start_screen(self):
