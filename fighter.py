@@ -15,6 +15,7 @@ class Fighter:
         self._y_margin = 20 # buffer space between plane and screen edges on y axis
         self._x_speed = 0.4
         self._y_speed = 0.4
+        self._slow_speed_threshold = 1 # y acceleration above this will trigger "slow" animation state
         self._roll_speed = 10 # higher is slower
         self._boot_animation_speed = 10 # higher is slower
         self._x_acceleration = 0 # positive means move right, negative means move left
@@ -52,11 +53,17 @@ class Fighter:
             if self._animation_sequence == self._roll_speed:
                 self.img_roll_left()
             elif self._animation_sequence == self._roll_speed*2:
-                self.img_roll_upside_down()
+                if self._y_acceleration > self._slow_speed_threshold:
+                    self.img_roll_upside_down_slow()
+                else:
+                    self.img_roll_upside_down()
             elif self._animation_sequence == self._roll_speed*3:
                 self.img_roll_right()
             elif self._animation_sequence >= self._roll_speed*4:
-                self.img_default()
+                if self._y_acceleration > self._slow_speed_threshold:
+                    self.img_defualt_slow()
+                else:
+                    self.img_default()
                 self._animation_in_progress = None
 
         self._animation_sequence += 1
@@ -80,11 +87,17 @@ class Fighter:
             if self._animation_sequence == self._roll_speed:
                 self.img_roll_right()
             elif self._animation_sequence == self._roll_speed*2:
-                self.img_roll_upside_down()
+                if self._y_acceleration > self._slow_speed_threshold:
+                    self.img_roll_upside_down_slow()
+                else:
+                    self.img_roll_upside_down()
             elif self._animation_sequence == self._roll_speed*3:
                 self.img_roll_left()
             elif self._animation_sequence >= self._roll_speed*4:
-                self.img_default()
+                if self._y_acceleration > self._slow_speed_threshold:
+                    self.img_defualt_slow()
+                else:
+                    self.img_default()
                 self._animation_in_progress = None
 
         self._animation_sequence += 1
@@ -106,7 +119,10 @@ class Fighter:
         elif self._animation_in_progress == "ROLL_RIGHT":
             self.roll_right()
         else:
-            self.img_default()
+            if self._y_acceleration > self._slow_speed_threshold:
+                self.img_defualt_slow()
+            else:
+                self.img_default()
 
         if self._x_acceleration > 1.1 or self._x_acceleration < -1.1:
             self._x += self._x_acceleration
@@ -212,12 +228,20 @@ class Fighter:
         self._u = 0
         self._v = 0
 
+    def img_defualt_slow(self):
+        self._u = 64
+        self._v = 0
+
     def img_roll_left(self):
         self._u = 16
         self._v = 0
 
     def img_roll_upside_down(self):
         self._u = 32
+        self._v = 0
+
+    def img_roll_upside_down_slow(self):
+        self._u = 80
         self._v = 0
 
     def img_roll_right(self):
