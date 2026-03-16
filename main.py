@@ -15,6 +15,7 @@ class App:
 
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
+        pyxel.playm(0, 0, loop=True)
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -31,14 +32,16 @@ class App:
         self.update_background()
         self.player.handle_movement(self.screen_width, self.screen_height)
 
-        if (pyxel.btn(pyxel.KEY_SPACE) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_B)) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_RIGHTSHOULDER):
-            self.player.shoot_gun(self.screen_height)
-        elif (pyxel.btnr(pyxel.KEY_SPACE) or pyxel.btnr(pyxel.GAMEPAD1_BUTTON_B)) or pyxel.btnr(pyxel.GAMEPAD1_BUTTON_RIGHTSHOULDER):
-            self.player.reset_gun_burst()
+        if (pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_RIGHTSHOULDER):
+            self.player.shoot(self.screen_height)
+            # self.player.shoot_gun(self.screen_height)
+        # elif (pyxel.btnr(pyxel.KEY_SPACE) or pyxel.btnr(pyxel.GAMEPAD1_BUTTON_B)) or pyxel.btnr(pyxel.GAMEPAD1_BUTTON_RIGHTSHOULDER):
+        #     self.player.reset_gun_burst()
         
-        if (pyxel.btnp(pyxel.KEY_SHIFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_LEFTSHOULDER):
-            # self.player.shoot_missile(self.screen_height)
-            self.player.fire_flares()
+        if (pyxel.btn(pyxel.KEY_SHIFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_A)) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_LEFTSHOULDER):
+            self.player.flares()
+        elif (pyxel.btnr(pyxel.KEY_SHIFT) or pyxel.btnr(pyxel.GAMEPAD1_BUTTON_A)) or pyxel.btnr(pyxel.GAMEPAD1_BUTTON_LEFTSHOULDER):
+            self.player.reset_flares()
 
         # Allow simultaneous vertical and horizontal input without blocking each other
         if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
@@ -82,7 +85,7 @@ class App:
             pyxel.pset(*particle.get_position_and_color())
 
         for particle in self.player.get_missile_particles():
-            pyxel.blt(particle.get_x(), particle.get_y(), 0, 0, 16, 1, 3)
+            pyxel.blt(particle.get_x(), particle.get_y(), 0, 96, 0, 3, 5)
 
     def update_background(self):
         self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling
@@ -99,7 +102,7 @@ class App:
         self.draw_background()
         self.draw_carrier(self.runway_position_y)
         pyxel.text(self.screen_width//2 - 15, self.screen_height//2 - 50, "PIXEL PILOT", 9)
-        pyxel.text(self.screen_width//2 - 50, self.screen_height//2 - 30, "CONTROLS: MOVE|FIRE|FLARES|PAUSE", 7)
+        pyxel.text(self.screen_width//2 - 50, self.screen_height//2 - 30, "CONTROLS: MOVE|SHOOT|FLARES|PAUSE", 7)
         pyxel.text(self.screen_width//2 - 50, self.screen_height//2 - 20, "KEYBOARD: ARROW KEYS|SPACE|SHIFT|P", 7)
         pyxel.text(self.screen_width//2 - 50, self.screen_height//2 - 10, "CONTROLLER: DPAD|A|B|START", 7)
         pyxel.text(self.screen_width//2 - 25, self.screen_height//2 + 10, "PRESS UP TO FLY!!!", 8)
@@ -107,6 +110,7 @@ class App:
 
     def update_start_screen(self):
         if (pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP)):
+            pyxel.stop()
             self.game_started = True
 
     def draw_carrier(self, y):

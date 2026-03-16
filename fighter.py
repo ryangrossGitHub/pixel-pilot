@@ -26,9 +26,11 @@ class Fighter:
         self._boost_particles = []
         self._flare_particles = []
         self._gun_particles = []
+        self._missile_particles = []
         self._gun_burst_max = 10
         self._gun_burst_count = 0 # Track how many shots have been fired in the current burst
-        self._missile_particles = []
+        self._flare_burst_max = 75
+        self._flare_burst_count = 0
 
     def get_animation_in_progress(self):
         return self._animation_in_progress
@@ -176,16 +178,22 @@ class Fighter:
     def get_boost_particles(self):
         return self._boost_particles
     
-    def fire_flares(self):
-        for i in range(50):
+    def flares(self):
+        if self._flare_burst_count < self._flare_burst_max:
+            pyxel.play(1, 2)
             self._flare_particles.append(Particle(
                 x=self._x + self._w/2 - 1,
                 y=self._y + self._h,
-                x_speed=(4) * (random.random() - 0.5), # Random horizontal speed for spread
+                x_speed=2 * (random.random() - 0.5), # Random horizontal speed for spread
                 y_speed=1 + random.random()*1.5, # Upwards speed with some variation
                 color=7, # white
-                life=random.randint(40, 60) # frames
+                life=random.randint(70, 120) # frames
             ))
+
+            self._flare_burst_count += 1
+
+    def reset_flares(self):
+        self._flare_burst_count = 0
 
     def _update_flare_particles(self):
         # Update existing particles
@@ -226,7 +234,7 @@ class Fighter:
     def get_gun_particles(self):
         return self._gun_particles
     
-    def shoot_missile(self, screen_height):
+    def shoot(self, screen_height):
         pyxel.play(0, 1)
         self._missile_particles.append(Particle(
             x=self._x + self._w/2 - 1,
