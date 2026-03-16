@@ -15,7 +15,7 @@ class App:
 
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
-        pyxel.playm(0, 0, loop=True)
+        pyxel.playm(1, 0, loop=True)
         pyxel.run(self.update, self.draw)
 
     def update(self):
