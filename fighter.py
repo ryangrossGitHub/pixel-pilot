@@ -110,6 +110,8 @@ class Fighter:
         if self._y_acceleration > -5:
             self._y_acceleration -= self._y_speed/1.5 # slower vert accel to sim air friction
 
+        pyxel.play(2, 3)
+
     def down(self):
         if self._y_acceleration < 5:
             self._y_acceleration += self._y_speed
