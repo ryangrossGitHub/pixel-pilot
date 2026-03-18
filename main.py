@@ -3,6 +3,7 @@ import random
 
 from fighter import Fighter
 from particle import Particle
+from enemy import Enemy
 
 class App:
     def __init__(self):
@@ -14,7 +15,7 @@ class App:
         self.game_started = False
         self.game_paused = False
         self.runway_position_y = self.screen_height - 80
-        self.explosion_particles = []
+        self.enemy = Enemy(self.screen_width//2, 20)
 
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
@@ -56,7 +57,7 @@ class App:
         if pyxel.btn(pyxel.KEY_DOWN) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
             self.player.down()
 
-        self.update_explosions()
+        self.enemy.update_explosion()
 
     def draw(self):
         if not self.game_started:
@@ -95,36 +96,15 @@ class App:
                 (my > 20 and my < 20 + 16)):
                 pyxel.play(3, 4)
                 particle.end_life()
-                self.create_explosion(mx, my-8)
+                self.enemy.hit()
             else:
                 pyxel.blt(mx, my, 0, 96, 0, 3, 5)
-                pyxel.blt(self.screen_width//2, 20, 0, 112, 0, 16, 16, 1)
-
         
-        
-        for particle in self.explosion_particles:
+        for particle in self.enemy.get_explosion_particles():
             pyxel.pset(*particle.get_position_and_color())
 
+        pyxel.blt(*self.enemy.blt())
         pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
-
-    def create_explosion(self, x, y):
-        for i in range(200):
-            self.explosion_particles.append(Particle(
-                    x=x,
-                    y=y,
-                    x_speed=(random.random() * 4) * (random.random() - 0.5), # Random horizontal speed for spread
-                    y_speed=random.uniform(-1, 1) * 2, # Upwards speed with some variation
-                    color=random.choice([8, 9, 10]), # yellow, orange, red
-                    life=random.randint(80, 120) # frames
-            ))
-
-    def update_explosions(self):
-        # Update existing particles
-        for particle in self.explosion_particles:
-            particle.update()
-
-        # Remove particles that have expired
-        self.explosion_particles = [p for p in self.explosion_particles if p.get_life() > 0]
 
     def update_background(self):
         self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling

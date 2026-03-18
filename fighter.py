@@ -169,12 +169,12 @@ class Fighter:
         if self._y_acceleration <= 0: # Only show boost particles when accelerating upwards
             for i in range(3 + int(self._y_acceleration*-1)): # More particles for higher acceleration
                 self._boost_particles.append(Particle(
-                    x=self._x + self._w/2 - 1,
+                    x=random.choice([self._x + self._w/2, self._x + self._w/2 - 2]), # Dual engine
                     y=self._y + self._h,
                     x_speed=(0.3+self._y_acceleration/5) * (random.random() - 0.5), # Random horizontal speed for spread
                     y_speed=-self._y_acceleration/4 + 0.5, # Base speed plus some variation based on acceleration
                     color=random.choice([9,10]), # yellow and orange
-                    life=random.randint(10, 35) # frames
+                    life=random.randint(10, 25) # frames
                 ))
 
     def get_boost_particles(self):
