@@ -15,6 +15,9 @@ class Particle:
     def get_life(self):
         return self._life
     
+    def end_life(self):
+        self._life = 0
+    
     def get_x(self):
         return self._x
     

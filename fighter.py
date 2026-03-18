@@ -212,7 +212,7 @@ class Fighter:
         if self._gun_burst_count < self._gun_burst_max:
             pyxel.play(0, 0)
             self._gun_particles.append(Particle(
-                x=self._x + self._w/2 - 1,
+                x=self._x + self._w/2 - 2,
                 y=self._y,
                 x_speed=0,
                 y_speed=-5, # Upwards speed with some variation
@@ -239,7 +239,7 @@ class Fighter:
     def shoot(self, screen_height):
         pyxel.play(0, 1)
         self._missile_particles.append(Particle(
-            x=self._x + self._w/2 - 1,
+            x=self._x + self._w/2 - 2,
             y=self._y,
             x_speed=0,
             y_speed=-5, 
