@@ -12,29 +12,52 @@ class App:
         self.player = Fighter(self.screen_width//2, self.screen_height-40, -2)
         self.background_y = 0
         self.background_scroll_speed = 1
-        self.game_started = False
-        self.game_paused = False
+        self.started = False
+        self.paused = False
         self.runway_position_y = self.screen_height - 80
-        self.enemy = Enemy(self.screen_width//2, 20)
+        self.level = 1
+        self.enemies = []
+        self.enemies_alive = 0
 
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
+
+        # Load enemies up front and recycle them for better performance
+        for i in range(5):
+            self.enemies.append(Enemy())
+
         pyxel.playm(1, 0, loop=True)
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        if not self.game_started:
+        if not self.started:
             self.update_start_screen()
             return
         
         if pyxel.btnp(pyxel.KEY_P) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_START):
-            self.game_paused = not self.game_paused
+            self.paused = not self.paused
 
-        if self.game_paused:
+        if self.paused:
             return
         
+        if self.level == 1:
+            desired_enemy_count = 1
+            for enemy in self.enemies:
+                needed_enemy_spawn_count = desired_enemy_count - self.enemies_alive
+                if needed_enemy_spawn_count > 0: 
+                    if not enemy.is_alive() and not enemy.is_exploding(): # find "dead" enemies that can be recycled
+                        enemy.spawn("TOP", self.screen_width, self.screen_height)
+                        self.enemies_alive += 1
+                else:
+                    break
+
         self.update_background()
         self.player.handle_movement(self.screen_width, self.screen_height)
+        
+        for enemy in self.enemies:
+            enemy.handle_movement(self.level)
+
+        self.update_missiles()
 
         if (pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_RIGHTSHOULDER):
             self.player.shoot(self.screen_height)
@@ -57,14 +80,12 @@ class App:
         if pyxel.btn(pyxel.KEY_DOWN) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
             self.player.down()
 
-        self.enemy.update_explosion()
-
     def draw(self):
-        if not self.game_started:
+        if not self.started:
             self.draw_start_screen()
             return
         
-        if self.game_paused:
+        if self.paused:
             return
         
         pyxel.cls(0)
@@ -89,22 +110,40 @@ class App:
             pyxel.pset(*particle.get_position_and_color())
 
         for particle in self.player.get_missile_particles():
+            self.draw_missile(particle.get_x(), particle.get_y())
+        
+        for enemy in self.enemies:
+            if enemy.is_alive():
+                self.draw_enemy(enemy)
+            elif enemy.is_exploding():
+                for particle in enemy.get_explosion_particles():
+                    pyxel.pset(*particle.get_position_and_color())
+        
+        self.draw_player() # draw player last to ensure it is always on top
+
+    def draw_player(self):
+        pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
+
+    def draw_enemy(self, enemy):
+        pyxel.blt(*enemy.blt())
+
+    def draw_missile(self, x, y):
+        pyxel.blt(x, y, 0, 96, 0, 3, 6)
+
+    def update_missiles(self):
+        for particle in self.player.get_missile_particles():
             mx = particle.get_x()
             my = particle.get_y()
 
-            if ((mx > self.screen_width//2 and mx < self.screen_width//2 + 16) and
-                (my > 20 and my < 20 + 16)):
-                pyxel.play(3, 4)
-                particle.end_life()
-                self.enemy.hit()
-            else:
-                pyxel.blt(mx, my, 0, 96, 0, 3, 5)
-        
-        for particle in self.enemy.get_explosion_particles():
-            pyxel.pset(*particle.get_position_and_color())
-
-        pyxel.blt(*self.enemy.blt())
-        pyxel.blt(*self.player.blt()) # * to unpack the tuple returned by blt()
+            for enemy in self.enemies:
+                if enemy.is_alive():
+                    if ((mx > enemy.get_x() and mx < enemy.get_x() + enemy.get_w()) and
+                        (my > enemy.get_y() and my < enemy.get_y() + enemy.get_h())):
+                        pyxel.play(3, 4)
+                        particle.end_life()
+                        enemy.hit()
+                        self.enemies_alive -= 1
+                        break
 
     def update_background(self):
         self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling
@@ -130,7 +169,7 @@ class App:
     def update_start_screen(self):
         if (pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP)):
             pyxel.stop()
-            self.game_started = True
+            self.started = True
 
     def draw_carrier(self, y):
         pyxel.blt(self.screen_width//2-24, y, 0, 0, 16, 56, 80, 1)

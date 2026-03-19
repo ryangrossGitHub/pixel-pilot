@@ -4,19 +4,46 @@ import random
 from particle import Particle
 
 class Enemy:
-    def __init__(self, x, y):
-        self._x = x
-        self._y = y
+    def __init__(self):
+        self._x = 0 # enemies are loaded at startup so location doesn't matter
+        self._y = 0 # enemies are loaded at startup so location doesn't matter
         self._sprite = 0 # image bank
         self._u = 112
         self._v = 0
         self._w = 16
         self._h = 16
+        self._y_speed = 0.2
         self._transparent_color = 1
         self._explosion_particles = []
-        self._alive = True
+        self._alive = False # enemies are loaded at startup so start "dead"
+
+    def get_x(self):
+        return self._x
+    
+    def get_y(self):
+        return self._y
+    
+    def get_h(self):
+        return self._h
+    
+    def get_w(self):
+        return self._w
+
+    def handle_movement(self, level):
+        if self.is_exploding():
+            self._update_explosion()
+
+        if self._alive:
+            if level == 1:
+                self.handle_movement_lvl_1()
+
+    # Simple downward drift, no side to side
+    def handle_movement_lvl_1(self):
+        if self._y < 20:
+            self._y += self._y_speed
 
     def hit(self):
+        self._alive = False
         for i in range(200):
             self._explosion_particles.append(Particle(
                     x=self._x + 8, # expolosion at middle of plane body
@@ -27,7 +54,26 @@ class Enemy:
                     life=random.randint(80, 120) # frames
             ))
 
-    def update_explosion(self):
+    def is_exploding(self):
+        if len(self._explosion_particles) > 0:
+            return True
+        else:
+            return False
+
+    def is_alive(self):
+        return self._alive
+    
+    def spawn(self, direction, screen_width, screen_height):
+        self._alive = True
+        self._x = random.randint(0, screen_width - self._w)
+
+        # We want the plan to start out of view and drift into view
+        if direction == "TOP":
+            self._y = -self._h
+        else:
+            self._y = screen_height
+
+    def _update_explosion(self):
         # Update existing particles
         for particle in self._explosion_particles:
             particle.update()

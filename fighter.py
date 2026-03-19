@@ -241,7 +241,7 @@ class Fighter:
         self._missile_particles.append(Particle(
             x=self._x + self._w/2 - 2,
             y=self._y,
-            x_speed=0,
+            x_speed=self._x_speed * self._x_acceleration,
             y_speed=-5, 
             color=0, # doesn't matter because will be drawn from sprite
             life=screen_height
