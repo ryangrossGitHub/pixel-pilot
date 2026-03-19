@@ -57,7 +57,7 @@ class App:
         for enemy in self.enemies:
             enemy.handle_movement(self.level)
 
-        self.update_missiles()
+        self.missile_enemy_collision_detection()
 
         if (pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_RIGHTSHOULDER):
             self.player.shoot(self.screen_height)
@@ -130,20 +130,50 @@ class App:
     def draw_missile(self, x, y):
         pyxel.blt(x, y, 0, 96, 0, 3, 6)
 
-    def update_missiles(self):
+    def missile_enemy_collision_detection(self):
         for particle in self.player.get_missile_particles():
             mx = particle.get_x()
             my = particle.get_y()
 
+            # Handle heat seeking
+            closest_enemy_x = None
+            closest_enemy_y = None
+
             for enemy in self.enemies:
                 if enemy.is_alive():
-                    if ((mx > enemy.get_x() and mx < enemy.get_x() + enemy.get_w()) and
-                        (my > enemy.get_y() and my < enemy.get_y() + enemy.get_h())):
+                    ex = enemy.get_x()
+                    ey = enemy.get_y()
+                    ew = enemy.get_w()
+                    eh = enemy.get_h()
+                    exc = ex + (ew/2) # enemy x center
+                    eyc = ey + (eh/2) # enemy y center
+
+                    if self.inside_of(mx, my, ex, ey, ew, eh):
                         pyxel.play(3, 4)
                         particle.end_life()
                         enemy.hit()
                         self.enemies_alive -= 1
                         break
+                    elif my > ey + eh: # Only heat seek if missile is lower (larger y) than enemy
+                        delta_x = mx - exc
+                        delta_y = my - eyc
+
+                        if (closest_enemy_x is None or
+                            abs(delta_x) + abs(delta_y) < abs(closest_enemy_x) + abs(closest_enemy_y)):
+                            closest_enemy_x = delta_x
+                            closest_enemy_y = delta_y
+
+            if closest_enemy_x is not None:
+                if closest_enemy_x > 0:
+                    particle.overriding_update_x(-1)
+                else:
+                    particle.overriding_update_x(1)
+
+    def inside_of(self, ax, ay, bx, by, bw, bh):
+        if ((ax > bx and ax < bx + bw) and (ay > by and ay < by + bh)):
+            return True
+        else:
+            return False
 
     def update_background(self):
         self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling

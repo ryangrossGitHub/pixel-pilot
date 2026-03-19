@@ -44,7 +44,7 @@ class Enemy:
 
     def hit(self):
         self._alive = False
-        for i in range(200):
+        for i in range(150):
             self._explosion_particles.append(Particle(
                     x=self._x + 8, # expolosion at middle of plane body
                     y=self._y + 8, # expolosion at middle of plane body

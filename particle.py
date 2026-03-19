@@ -12,6 +12,9 @@ class Particle:
         self._y += self._y_speed
         self._life -= 1
 
+    def overriding_update_x(self, x):
+        self._x += x
+
     def get_life(self):
         return self._life
     
