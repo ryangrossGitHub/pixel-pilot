@@ -4,6 +4,7 @@ import random
 from fighter import Fighter
 from particle import Particle
 from enemy import Enemy
+from levels import LEVEL_CONFIG
 
 class App:
     def __init__(self):
@@ -15,10 +16,9 @@ class App:
         self.started = False
         self.paused = False
         self.runway_position_y = self.screen_height - 80
-        self.level = 1
         self.enemies = []
         self.enemies_alive = 0
-
+        
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
 
@@ -41,7 +41,7 @@ class App:
             return
         
         if self.level == 1:
-            desired_enemy_count = 1
+            desired_enemy_count = 25
             for enemy in self.enemies:
                 needed_enemy_spawn_count = desired_enemy_count - self.enemies_alive
                 if needed_enemy_spawn_count > 0: 
