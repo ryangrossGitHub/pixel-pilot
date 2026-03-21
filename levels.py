@@ -9,7 +9,7 @@ LEVEL_CONFIG = {
     2: {
         "enemy": {
             "top": {
-                "count": 3,
+                "count": 5,
                 "movement": 1,
                 "reaction": 1
             }

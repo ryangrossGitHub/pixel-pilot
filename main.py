@@ -17,13 +17,18 @@ class App:
         self.paused = False
         self.runway_position_y = self.screen_height - 80
         self.enemies = []
-        self.enemies_alive = 0
+        self.enemy_load_count = 15
+        self.enemies_alive_top = 0
+        self.enemies_alive_bottom = 0
+        self.level = 1
+        self.splash_count = 0
+        self.splash_per_level = 10
         
         pyxel.init(self.screen_width, self.screen_height, title="Pixel Pilot", fps=60)
         pyxel.load("sprites.pyxres")
 
         # Load enemies up front and recycle them for better performance
-        for i in range(5):
+        for i in range(self.enemy_load_count):
             self.enemies.append(Enemy())
 
         pyxel.playm(1, 0, loop=True)
@@ -40,22 +45,16 @@ class App:
         if self.paused:
             return
         
-        if self.level == 1:
-            desired_enemy_count = 25
-            for enemy in self.enemies:
-                needed_enemy_spawn_count = desired_enemy_count - self.enemies_alive
-                if needed_enemy_spawn_count > 0: 
-                    if not enemy.is_alive() and not enemy.is_exploding(): # find "dead" enemies that can be recycled
-                        enemy.spawn("TOP", self.screen_width, self.screen_height)
-                        self.enemies_alive += 1
-                else:
-                    break
+        if self.splash_count >= self.splash_per_level:
+            self.splash_count = 0
+            self.level += 1
 
+        self.spawn_new_enemies()
         self.update_background()
         self.player.handle_movement(self.screen_width, self.screen_height)
         
         for enemy in self.enemies:
-            enemy.handle_movement(self.level)
+            enemy.handle_movement(self.level, self.screen_width, self.screen_height)
 
         self.missile_enemy_collision_detection()
 
@@ -152,7 +151,13 @@ class App:
                         pyxel.play(3, 4)
                         particle.end_life()
                         enemy.hit()
-                        self.enemies_alive -= 1
+                        self.splash_count += 1
+
+                        if enemy.get_spawn_location() == 'top':
+                            self.enemies_alive_top -= 1
+                        else:
+                            self.enemies_alive_bottom -= 1
+
                         break
                     elif my > ey + eh: # Only heat seek if missile is lower (larger y) than enemy
                         delta_x = mx - exc
@@ -174,6 +179,26 @@ class App:
             return True
         else:
             return False
+
+    def spawn_new_enemies(self):
+        for enemy in self.enemies:
+            needed_enemy_spawn_count = LEVEL_CONFIG[self.level]['enemy']['top']['count'] - self.enemies_alive_top
+            if needed_enemy_spawn_count > 0: 
+                if not enemy.is_alive() and not enemy.is_exploding(): # find "dead" enemies that can be recycled
+                    enemy.spawn("top", self.screen_width, self.screen_height)
+                    self.enemies_alive_top += 1
+            else:
+                break
+        
+        if 'bottom' in LEVEL_CONFIG[self.level]['enemy']:
+            for enemy in self.enemies:
+                needed_enemy_spawn_count = LEVEL_CONFIG[self.level]['enemy']['bottom']['count'] - self.enemies_alive_bottom
+                if needed_enemy_spawn_count > 0: 
+                    if not enemy.is_alive() and not enemy.is_exploding(): # find "dead" enemies that can be recycled
+                        enemy.spawn("bottom", self.screen_width, self.screen_height)
+                        self.enemies_alive_bottom += 1
+                else:
+                    break
 
     def update_background(self):
         self.background_y = (self.background_y + self.background_scroll_speed) % self.screen_height # Loop background every 16 pixels for seamless scrolling

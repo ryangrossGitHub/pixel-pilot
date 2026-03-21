@@ -16,6 +16,7 @@ class Enemy:
         self._transparent_color = 1
         self._explosion_particles = []
         self._alive = False # enemies are loaded at startup so start "dead"
+        self._spawn_location = None
 
     def get_x(self):
         return self._x
@@ -28,19 +29,24 @@ class Enemy:
     
     def get_w(self):
         return self._w
+    
+    def get_spawn_location(self):
+        return self._spawn_location
 
-    def handle_movement(self, level):
+    def handle_movement(self, level, screen_width, screen_height):
         if self.is_exploding():
             self._update_explosion()
 
         if self._alive:
-            if level == 1:
-                self.handle_movement_lvl_1()
+            if level >= 1:
+                self.handle_movement_lvl_1(screen_width, screen_height)
 
     # Simple downward drift, no side to side
-    def handle_movement_lvl_1(self):
+    def handle_movement_lvl_1(self, screen_width, screen_height):
         if self._y < 20:
             self._y += self._y_speed
+        elif self._y + self._h > screen_height - 20:
+            self._y -= self._y_speed
 
     def hit(self):
         self._alive = False
@@ -65,10 +71,11 @@ class Enemy:
     
     def spawn(self, direction, screen_width, screen_height):
         self._alive = True
+        self._spawn_location = direction
         self._x = random.randint(0, screen_width - self._w)
 
         # We want the plan to start out of view and drift into view
-        if direction == "TOP":
+        if direction == "top":
             self._y = -self._h
         else:
             self._y = screen_height
