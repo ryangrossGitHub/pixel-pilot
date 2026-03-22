@@ -12,7 +12,12 @@ class Enemy:
         self._v = 0
         self._w = 16
         self._h = 16
-        self._y_speed = 0.2
+        self._x_speed = 0
+        self._y_speed = 0
+        self._speed_1 = 0.2
+        self._speed_2 = 0.6
+        self._speed_3 = 1.2
+        self._reaction = 0
         self._transparent_color = 1
         self._explosion_particles = []
         self._alive = False # enemies are loaded at startup so start "dead"
@@ -33,20 +38,31 @@ class Enemy:
     def get_spawn_location(self):
         return self._spawn_location
 
-    def handle_movement(self, level, screen_width, screen_height):
+    def handle_movement(self, screen_width, screen_height):
         if self.is_exploding():
             self._update_explosion()
 
         if self._alive:
-            if level >= 1:
-                self.handle_movement_lvl_1(screen_width, screen_height)
+            # Drift into view (y)
+            if self._y < 20:
+                self._y += self._y_speed
+            elif self._y + self._h > screen_height - 20:
+                self._y -= self._y_speed
 
-    # Simple downward drift, no side to side
-    def handle_movement_lvl_1(self, screen_width, screen_height):
-        if self._y < 20:
-            self._y += self._y_speed
-        elif self._y + self._h > screen_height - 20:
-            self._y -= self._y_speed
+            # Drift to center (x) so enemies don't only move out to edges when dodging missiles
+            if self._x < 50:
+                self._x += self._x_speed
+            elif self._x + self._w > screen_width - 50:
+                self._x -= self._x_speed
+
+    def handle_reaction(self, direction, screen_width):
+        if self._reaction == 1:
+            if direction < 0: # left
+                if self._x > 20:
+                    self._x -= self._x_speed
+            else: # right
+                if self._x + self._w < screen_width - 20:
+                    self._x += self._x_speed
 
     def hit(self):
         self._alive = False
@@ -69,16 +85,34 @@ class Enemy:
     def is_alive(self):
         return self._alive
     
-    def spawn(self, direction, screen_width, screen_height):
+    def spawn(self, direction, level_config, screen_width, screen_height):
         self._alive = True
         self._spawn_location = direction
         self._x = random.randint(0, screen_width - self._w)
 
-        # We want the plan to start out of view and drift into view
+        # We want the plane to start out of view and drift into view
         if direction == "top":
             self._y = -self._h
         else:
             self._y = screen_height
+
+        if 'movement' not in level_config:
+            self._x_speed = self._speed_1
+            self._y_speed = self._speed_1
+        elif level_config['movement'] == 1:
+            self._x_speed = self._speed_1
+            self._y_speed = self._speed_1
+        elif level_config['movement'] == 2:
+            self._x_speed = self._speed_2
+            self._y_speed = self._speed_2
+        elif level_config['movement'] == 3:
+            self._x_speed = self._speed_3
+            self._y_speed = self._speed_3
+
+        if 'reaction' in level_config:
+            self._reaction = level_config['reaction']
+        else:
+            self._reaction = 0
 
     def _update_explosion(self):
         # Update existing particles

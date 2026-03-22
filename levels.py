@@ -2,14 +2,14 @@ LEVEL_CONFIG = {
     1: {
         "enemy": {
             "top": {
-                "count": 2
+                "count": 1,
             }
         }
     },
     2: {
         "enemy": {
             "top": {
-                "count": 5,
+                "count": 2,
                 "movement": 1,
                 "reaction": 1
             }
@@ -18,9 +18,9 @@ LEVEL_CONFIG = {
     3: {
         "enemy": {
             "top": {
-                "count": 5,
-                "movement": 1,
-                "reaction": 2
+                "count": 3,
+                "movement": 2,
+                "reaction": 1
             }
         }
     },
